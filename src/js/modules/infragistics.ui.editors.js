@@ -1778,7 +1778,12 @@
 					}
 					break;
 				case "listItems":
-					this._deleteList();
+
+					// A. M. April, 4th 2017 #921 "Cannot apply `listItems` to `igNumericEditor` after initialization"
+					// This is the same fix made on Nov 8, 2016 by M. S. for Issue #481 in version 17.1
+					if (prevValue !== null) {
+						this._deleteList();
+					}
 					this._createList();
 					this._clearValue();
 					break;
@@ -2776,7 +2781,7 @@
 				} else if (this.options.maxLength) {
 					currentInputVal = this._editorInput.val();
 					if (currentInputVal.length === this.options.maxLength &&
-							e.keyCode > 46 && !e.altKey && !e.ctrlKey && !e.shiftKey) {
+							(e.keyCode > 46 || e.keyCode === 32) && !e.altKey && !e.ctrlKey) {
 						selection = this._getSelection(this._editorInput[ 0 ]);
 						if (selection.start === selection.end) {
 							e.preventDefault();
@@ -3381,7 +3386,7 @@
 			if (input.setSelectionRange) {
 				// IE specific issue when the editor is detached
 				// and setSelectionRange is called as part of a composition mode end
-				if (!jQuery.contains(document.documentElement, input) && $.ig.util.isIE) {
+				if (!$.contains(document.documentElement, input) && $.ig.util.isIE) {
 					return;
 				}
 				input.setSelectionRange(selectionStart, selectionEnd);
@@ -6954,7 +6959,9 @@
 		_validateRequiredPrompts: function (value) {
 			var i;
 			if (value === "") {
-				return false;
+
+				// D.P. #446 Ignore empty value. Mask editor required prompts validation now allows empty value.
+				return true;
 			}
 			for (i = 0; i < this._requiredIndeces.length; i++) {
 				var ch = value.charAt(this._requiredIndeces[ i ]);
